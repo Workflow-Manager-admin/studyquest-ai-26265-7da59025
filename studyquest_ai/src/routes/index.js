@@ -106,4 +106,80 @@ router.get('/', healthController.check.bind(healthController));
 // POST /upload (PDF/DOCX only)
 router.post('/upload', upload.single('file'), uploadController.uploadFile);
 
+/**
+ * @swagger
+ * /generate-mcqs:
+ *   post:
+ *     summary: Generate MCQs from extracted text
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 description: The extracted plain text from a study material
+ *               maxQuestions:
+ *                 type: integer
+ *                 description: Maximum number of MCQs to generate (default 10)
+ *               language:
+ *                 type: string
+ *                 description: Language for MCQs (default English)
+ *             required:
+ *               - text
+ *     responses:
+ *       200:
+ *         description: Array of generated MCQs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 count:
+ *                   type: integer
+ *                 questions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       question:
+ *                         type: string
+ *                       choices:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       answer:
+ *                         type: string
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: API or server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+
+// MCQ generation endpoint
+router.post('/generate-mcqs', mcqController.generate);
+
 module.exports = router;
