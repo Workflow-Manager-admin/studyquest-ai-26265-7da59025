@@ -1,6 +1,7 @@
 const express = require('express');
 const healthController = require('../controllers/health');
 const uploadController = require('../controllers/upload');
+const mcqController = require('../controllers/mcq');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
