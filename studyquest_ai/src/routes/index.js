@@ -433,16 +433,67 @@ router.post('/quiz/:sessionId/answer', quizController.answerCurrentQuestion);
  * @swagger
  * /quiz/{sessionId}/results:
  *   get:
- *     summary: Get results for quiz session
+ *     summary: Get final results for a quiz session
+ *     description: >
+ *       Returns a detailed result summary for a quiz session, including total number of questions, number correct and incorrect, and per-question answer info.
  *     parameters:
  *       - in: path
  *         name: sessionId
  *         required: true
  *         schema:
  *           type: string
+ *         description: The quiz session ID to fetch results for.
  *     responses:
- *       200: { description: Result summary }
- *       400: { description: Error }
+ *       200:
+ *         description: Quiz results summary object.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       description: Total number of MCQs in session.
+ *                     correct:
+ *                       type: integer
+ *                       description: Number of questions answered correctly.
+ *                     incorrect:
+ *                       type: integer
+ *                       description: Number answered incorrectly.
+ *                     answers:
+ *                       type: array
+ *                       description: Detailed answer info for each question.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           questionIndex:
+ *                             type: integer
+ *                           submitted:
+ *                             type: string
+ *                             description: The answer chosen by the user.
+ *                           correctAnswer:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                             enum: [correct, incorrect]
+ *       400:
+ *         description: Invalid session or error fetching results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: fail
+ *                 message:
+ *                   type: string
  */
 router.get('/quiz/:sessionId/results', quizController.getQuizResults);
 
