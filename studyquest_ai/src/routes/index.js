@@ -40,7 +40,10 @@ router.get('/', healthController.check.bind(healthController));
  * @swagger
  * /upload:
  *   post:
- *     summary: Upload a PDF or DOCX file
+ *     summary: Upload a PDF or DOCX file and extract its text content.
+ *     description: >
+ *       Accepts a single PDF or DOCX file upload. The response includes metadata describing the uploaded file and the extracted plain text content, if successfully extracted.
+ *       Also indicates content extraction errors if extraction fails.
  *     consumes:
  *       - multipart/form-data
  *     requestBody:
@@ -53,9 +56,10 @@ router.get('/', healthController.check.bind(healthController));
  *               file:
  *                 type: string
  *                 format: binary
+ *                 description: The PDF or DOCX file to upload. Only one file per request.
  *     responses:
  *       201:
- *         description: File uploaded successfully
+ *         description: File uploaded successfully and text extracted
  *         content:
  *           application/json:
  *             schema:
@@ -63,8 +67,10 @@ router.get('/', healthController.check.bind(healthController));
  *               properties:
  *                 status:
  *                   type: string
+ *                   example: success
  *                 message:
  *                   type: string
+ *                   example: File uploaded successfully
  *                 file:
  *                   type: object
  *                   properties:
@@ -80,8 +86,15 @@ router.get('/', healthController.check.bind(healthController));
  *                       type: string
  *                     uploadTime:
  *                       type: string
+ *                     extractedText:
+ *                       type: string
+ *                       description: The extracted plain text from the uploaded file. Empty if extraction failed.
+ *                     contentExtractionError:
+ *                       type: string
+ *                       nullable: true
+ *                       description: Error message if text extraction failed.
  *       400:
- *         description: Failed validation or missing file
+ *         description: Failed validation (e.g., missing file or unsupported filetype)
  *         content:
  *           application/json:
  *             schema:
@@ -89,10 +102,12 @@ router.get('/', healthController.check.bind(healthController));
  *               properties:
  *                 status:
  *                   type: string
+ *                   example: fail
  *                 message:
  *                   type: string
+ *                   example: No file uploaded
  *       500:
- *         description: Server error
+ *         description: Server error (file upload or internal error)
  *         content:
  *           application/json:
  *             schema:
@@ -100,6 +115,7 @@ router.get('/', healthController.check.bind(healthController));
  *               properties:
  *                 status:
  *                   type: string
+ *                   example: error
  *                 message:
  *                   type: string
  */
