@@ -222,7 +222,9 @@ router.post('/upload', upload.single('file'), uploadController.uploadFile);
  * /quiz/start:
  *   post:
  *     summary: Start a new quiz session
- *     description: Starts a quiz session with a list of MCQs. Returns a sessionId and the first question (without answer field).
+ *     description: >
+ *       Starts a quiz session with an array of MCQs (from generation or upload).
+ *       Returns a sessionId and the first question (for quizzing; answer field is omitted on client side).
  *     requestBody:
  *       required: true
  *       content:
@@ -232,6 +234,7 @@ router.post('/upload', upload.single('file'), uploadController.uploadFile);
  *             properties:
  *               questions:
  *                 type: array
+ *                 description: Array of MCQs used to initialize the quiz session.
  *                 items:
  *                   type: object
  *                   properties:
@@ -243,21 +246,63 @@ router.post('/upload', upload.single('file'), uploadController.uploadFile);
  *                         type: string
  *                     answer:
  *                       type: string
+ *             required:
+ *               - questions
  *     responses:
  *       201:
- *         description: Quiz session started.
+ *         description: Quiz session started successfully. Returns new session and first question.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 status: { type: string }
- *                 sessionId: { type: string }
- *                 question: { type: object }
- *                 questionIndex: { type: integer }
- *                 total: { type: integer }
- *       400: { description: Validation error }
- *       500: { description: Server error }
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 sessionId:
+ *                   type: string
+ *                   example: 512beabc1b...
+ *                 question:
+ *                   type: object
+ *                   description: First MCQ—answer field is omitted.
+ *                   properties:
+ *                     question:
+ *                       type: string
+ *                     choices:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                 questionIndex:
+ *                   type: integer
+ *                   example: 0
+ *                 total:
+ *                   type: integer
+ *                   example: 10
+ *       400:
+ *         description: Input is missing or invalid (e.g., no MCQs supplied)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: fail
+ *                 message:
+ *                   type: string
+ *                   example: No MCQs supplied to start quiz
+ *       500:
+ *         description: Internal error instantiating quiz session
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
  */
 router.post('/quiz/start', quizController.startQuizSession);
 
@@ -265,19 +310,53 @@ router.post('/quiz/start', quizController.startQuizSession);
  * @swagger
  * /quiz/{sessionId}/question:
  *   get:
- *     summary: Get current question for session
+ *     summary: Get current question for a quiz session
+ *     description: >
+ *       Returns the current MCQ for a given session, based on sessionId and cursor. If no more questions remain or session invalid, error is returned.
  *     parameters:
  *       - in: path
  *         name: sessionId
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the quiz session
+ *         description: The quiz session ID to fetch the current MCQ for.
  *     responses:
  *       200:
  *         description: Current question and progress
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 question:
+ *                   type: object
+ *                   properties:
+ *                     question:
+ *                       type: string
+ *                     choices:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                 questionIndex:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
  *       400:
- *         description: Bad session or no more questions
+ *         description: Session invalid, quiz completed, or no more questions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: fail
+ *                 message:
+ *                   type: string
+ *                   example: Invalid or expired session
  */
 router.get('/quiz/:sessionId/question', quizController.getCurrentQuestion);
 
