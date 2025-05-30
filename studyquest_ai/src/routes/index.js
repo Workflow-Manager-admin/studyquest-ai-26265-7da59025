@@ -180,6 +180,114 @@ router.post('/upload', upload.single('file'), uploadController.uploadFile);
  *                   type: string
  */
 
+/**
+ * @swagger
+ * /quiz/start:
+ *   post:
+ *     summary: Start a new quiz session
+ *     description: Starts a quiz session with a list of MCQs. Returns a sessionId and the first question (without answer field).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     question:
+ *                       type: string
+ *                     choices:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     answer:
+ *                       type: string
+ *     responses:
+ *       201:
+ *         description: Quiz session started.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status: { type: string }
+ *                 sessionId: { type: string }
+ *                 question: { type: object }
+ *                 questionIndex: { type: integer }
+ *                 total: { type: integer }
+ *       400: { description: Validation error }
+ *       500: { description: Server error }
+ */
+router.post('/quiz/start', quizController.startQuizSession);
+
+/**
+ * @swagger
+ * /quiz/{sessionId}/question:
+ *   get:
+ *     summary: Get current question for session
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the quiz session
+ *     responses:
+ *       200:
+ *         description: Current question and progress
+ *       400:
+ *         description: Bad session or no more questions
+ */
+router.get('/quiz/:sessionId/question', quizController.getCurrentQuestion);
+
+/**
+ * @swagger
+ * /quiz/{sessionId}/answer:
+ *   post:
+ *     summary: Answer current question
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of session
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               choice:
+ *                 type: string
+ *     responses:
+ *       200: { description: Answer feedback and optional next question/results }
+ *       400: { description: Error }
+ */
+router.post('/quiz/:sessionId/answer', quizController.answerCurrentQuestion);
+
+/**
+ * @swagger
+ * /quiz/{sessionId}/results:
+ *   get:
+ *     summary: Get results for quiz session
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200: { description: Result summary }
+ *       400: { description: Error }
+ */
+router.get('/quiz/:sessionId/results', quizController.getQuizResults);
+
 // MCQ generation endpoint
 router.post('/generate-mcqs', mcqController.generate);
 
