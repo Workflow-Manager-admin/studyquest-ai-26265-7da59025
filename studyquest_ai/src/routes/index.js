@@ -3,6 +3,7 @@ const healthController = require('../controllers/health');
 const uploadController = require('../controllers/upload');
 const mcqController = require('../controllers/mcq');
 const upload = require('../middleware/upload');
+const quizController = require('../controllers/quiz');
 
 const router = express.Router();
 // Health endpoint
