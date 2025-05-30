@@ -364,14 +364,16 @@ router.get('/quiz/:sessionId/question', quizController.getCurrentQuestion);
  * @swagger
  * /quiz/{sessionId}/answer:
  *   post:
- *     summary: Answer current question
+ *     summary: Submit answer to current question in session
+ *     description: >
+ *       Submits the user's answer (as the `choice` string) for the current quiz question. Returns whether the answer was correct, what the correct answer was, and if the quiz is finished, the final score/results.
  *     parameters:
  *       - in: path
  *         name: sessionId
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of session
+ *         description: The quiz session ID.
  *     requestBody:
  *       required: true
  *       content:
@@ -381,9 +383,49 @@ router.get('/quiz/:sessionId/question', quizController.getCurrentQuestion);
  *             properties:
  *               choice:
  *                 type: string
+ *                 description: The user-selected answer (must be one of the choices shown).
  *     responses:
- *       200: { description: Answer feedback and optional next question/results }
- *       400: { description: Error }
+ *       200:
+ *         description: Feedback after submitting answer.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 correct:
+ *                   type: boolean
+ *                 correctAnswer:
+ *                   type: string
+ *                 questionIndex:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 isLast:
+ *                   type: boolean
+ *                   description: True if this was the final question in the quiz.
+ *                 nextQuestion:
+ *                   type: object
+ *                   nullable: true
+ *                   description: The next MCQ question to be answered, or null if quiz finished.
+ *                 score:
+ *                   type: object
+ *                   nullable: true
+ *                   description: Quiz results summary if quiz completed (see /results endpoint).
+ *       400:
+ *         description: Session invalid, bad or missing choice, or quiz already completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: fail
+ *                 message:
+ *                   type: string
  */
 router.post('/quiz/:sessionId/answer', quizController.answerCurrentQuestion);
 
